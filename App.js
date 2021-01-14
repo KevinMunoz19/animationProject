@@ -15,6 +15,8 @@ import Animation1 from './src/views/Animation1';
 import Animation2 from './src/views/Animation2';
 import Animation3 from './src/views/Animation3';
 import Animation4 from './src/views/Animation4';
+import Animation5 from './src/views/Animation5';
+import gqlEx from './src/views/graphqlEx';
 const App = () => {
   const [loading,setLoading] = useState(false);
   return (
@@ -26,13 +28,13 @@ const App = () => {
         <Scene key="a2" component={Animation2} hideNavBar={true} title="A2" initial={false}/>
         <Scene key="a3" component={Animation3} hideNavBar={true} title="A3" initial={false}/>
         <Scene key="a4" component={Animation4} hideNavBar={true} title="A4" initial={false}/>
+        <Scene key="a5" component={Animation5} hideNavBar={true} title="A5" initial={false}/>
+        <Scene key="gqlex" component={gqlEx} hideNavBar={true} title="Gqlex" initial={false}/>
+
       </Stack>
     </Router>
   );
 }
-
-
-
 const styles = StyleSheet.create({
   tabBar: {
     height: 40,

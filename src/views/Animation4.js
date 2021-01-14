@@ -5,7 +5,7 @@
 /* eslint-disable no-mixed-spaces-and-tabs */
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React, {useState} from 'react';
+import * as React from 'react';
 import {
     Vibration,
     StatusBar,
@@ -36,8 +36,21 @@ const Animation4 = () => {
     const [duration, setDuration] =React.useState(timers[0]);
     const inputRef = React.useRef()
     const timerAnimation = React.useRef(new Animated.Value(height)).current;
+    const textInputAnimation = React.useRef(new Animated.Value(timers[0])).current;
     const buttonAnimation = React.useRef(new Animated.Value(0)).current;
+    React.useEffect(() => {
+        const listener = textInputAnimation.addListener(({value}) => {
+            inputRef?.current?.setNativeProps({
+                text: Math.ceil(value).toString()
+            })
+        })
+        return () => {
+            textInputAnimation.removeListener(listener)
+            textInputAnimation.removeAllListeners();
+        }
+    })
     const animation = React.useCallback(() => {
+        textInputAnimation.setValue(duration);
         Animated.sequence([
             Animated.timing(buttonAnimation,{
                 toValue:1,
@@ -49,18 +62,29 @@ const Animation4 = () => {
                 duration: 300,
                 useNativeDriver:true
             }),
-            Animated.timing(timerAnimation, {
-                toValue:height,
-                duration: duration * 1000,
-                useNativeDriver: true,
-            }),
+            Animated.parallel([
+                Animated.timing(textInputAnimation, {
+                    toValue:0,
+                    duration: duration * 1000,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(timerAnimation, {
+                    toValue:height,
+                    duration: duration * 1000,
+                    useNativeDriver: true,
+                })
+            ]),
+            Animated.delay(400)
         ]).start(() => {
+            Vibration.cancel();
+            Vibration.vibrate();
+            textInputAnimation.setValue(duration);
             Animated.timing(buttonAnimation, {
                 toValue:0,
                 duration: 300,
                 useNativeDriver:true
             }).start()
-        });
+        })
     },[duration]);
     const opacity = buttonAnimation.interpolate({
         inputRange: [0, 1],
@@ -69,6 +93,10 @@ const Animation4 = () => {
     const translateY = buttonAnimation.interpolate({
         inputRange: [0, 1],
         outputRange: [0, 200]
+    });
+    const textOpacity = buttonAnimation.interpolate({
+        inputRange: [0, 1],
+        outputRange: [0, 1]
     });
     return (
         <View style={styles.container}>
@@ -112,12 +140,19 @@ const Animation4 = () => {
                 flex: 1,
                 }}
             >
-                <Animated.View>
+                <Animated.View style = {{
+                    position: 'absolute',
+                    width: ITEM_SIZE,
+                    justifyContent: 'center',
+                    alignSelf:'center',
+                    alignItems:'center',
+                    opacity:textOpacity
+                }}>
                     <TextInput
-                        ref={inputRef}
-                        style={styles.text}
-                        defaultValue={duration.toString()}
-                    />
+                        ref = {inputRef}
+                        style = {styles.text}
+                        defaultValue = {duration.toString()}
+                    /> 
                 </Animated.View>
                 <Animated.FlatList
                     data = {timers}
@@ -128,13 +163,14 @@ const Animation4 = () => {
                     style={{flexGrow:0}}
                     snapToInterval={ITEM_SIZE}
                     decelerationRate = "fast"
+                    style = {{flexGrow:0, opacity}}
                     onScroll={ Animated.event(
                         [{nativeEvent: {contentOffset:{x:scrollX}}}],
                         {useNativeDriver:false}
                     )}
                     onMomentumScrollEnd={ev => {
                         const index = Math.round(ev.nativeEvent.contentOffset.x / ITEM_SIZE);
-                        setDuration([timers[index]]);
+                        setDuration(timers[index]);
 
                     }}
                     contentContainerStyle = {{

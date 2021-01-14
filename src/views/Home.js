@@ -58,6 +58,28 @@ const Home = () => {
             Timer Animation
           </Text>
         </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => Actions.a5()}
+        >
+          <Text
+            style={{textAlign: 'center', fontSize: 12}}
+            allowFontScaling={false}>
+            Carousel Animation 60fps
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.sendButton}
+          onPress={() => Actions.gqlex()}
+        >
+          <Text
+            style={{textAlign: 'center', fontSize: 12}}
+            allowFontScaling={false}>
+            GraphQl Example
+          </Text>
+        </TouchableOpacity>
       </React.Fragment>
     </View>
   );
