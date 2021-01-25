@@ -1,22 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  ScrollView,
-  View,
-  Text,
-  StatusBar,
-  TouchableOpacity,
-} from 'react-native';
+import React from 'react';
+import {Text} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
-import {
-  Scene,
-  Router,
-  Stack,
-  Tabs,
-  Actions,
-  ActionConst,
-} from 'react-native-router-flux';
+import {Scene, Router, Stack} from 'react-native-router-flux';
 import Init from './src/views/Init';
 import Home from './src/views/Home';
 import Animation1 from './src/views/Animation1';
@@ -28,11 +13,7 @@ import AnimatedHome from './src/views/AnimatedHome';
 import gqlEx from './src/views/GraphqlEx';
 import gqlAdd from './src/views/GraphqlAdd';
 import jwtDecoder from 'jwt-decode';
-import {createHttpLink} from 'apollo-link-http';
-import {InMemoryCache} from 'apollo-cache-inmemory';
-import {setContext} from '@apollo/client/link/context';
-
-import {ApolloProvider, ApolloLink, ApolloClient} from '@apollo/client';
+import {ApolloProvider} from '@apollo/client';
 import makeApolloClient from './src/utils/apollo';
 const login = (email, password, token) => {
   fetch('https://hasura.io/learn/auth/login', {
