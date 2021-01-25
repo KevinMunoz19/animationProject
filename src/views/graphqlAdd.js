@@ -74,7 +74,7 @@ const INSERT_TODO = gql`
 
 
 
-const graphqlAdd = () => {
+const GraphqlAdd = () => {
     const [insertTodo, { data ,loading, errorInsert }] = useMutation(INSERT_TODO);
     const {width, height} = Dimensions.get('screen');
     const [isPublic, setIsPublic] = React.useState(true);
@@ -192,5 +192,5 @@ const styles = StyleSheet.create({
     },
 });
 
-export default graphqlAdd;
+export default GraphqlAdd;
 
