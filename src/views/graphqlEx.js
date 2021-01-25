@@ -14,8 +14,8 @@ import {
   Image,
   Animated,
 } from 'react-native';
+import LoadingIndicator from '../components/LoadingIndicator';
 import AsyncStorage from '@react-native-community/async-storage';
-
 import { HttpLink } from 'apollo-link-http';
 import { ApolloClient } from 'apollo-client';
 import { InMemoryCache } from 'apollo-cache-inmemory'
@@ -23,7 +23,6 @@ import { NetworkStatus } from '@apollo/client';
 //import gql from 'graphql-tag';
 import { gql, useQuery } from '@apollo/client';
 import { useMutation } from '@apollo/react-hooks';
-
 
 const FETCH_TODOS = gql`
     query ($isPublic: Boolean) {
@@ -46,11 +45,9 @@ const FETCH_TODOS = gql`
     }
 `;
 
-
 const graphqlEx = () => {
     const {width, height} = Dimensions.get('screen');
-
-  const { data, loading, error, networkStatus } = useQuery(
+    const { data, loading, error, networkStatus } = useQuery(
         FETCH_TODOS,
         {
             variables: { isPublic },
@@ -59,17 +56,10 @@ const graphqlEx = () => {
             notifyOnNetworkStatusChange: true,
         }
     );
-
-
-
     const [isPublic, setIsPublic] = React.useState(true);
     //const [text, setText] = React.useState('AAA');
     //const [insertTodo, { loadingInsert, errorInsert }] = useMutation(INSERT_TODO);
     //const [updateTodo, { loading: updating, error: updateError}] = useMutation(UPDATE_TODO);
-    
-  
-   
-    
 
     const INSERT_TODO = gql`
         mutation ($text: String!, $isPublic: Boolean){
@@ -130,16 +120,12 @@ const graphqlEx = () => {
         }
     `;
 
-
-   
-
     const submit = () => {
         insertTodo({
             variables: { text, isPublic },
             update: updateCache
         });
     }; 
-
     const updateCache = (client, {data:{insert_todos}}) => {
         const data = client.readQuery({
             query: FETCH_TODOS,
@@ -198,95 +184,155 @@ const graphqlEx = () => {
         };
     }
 
+    const SPACING = 20;
+    const AVATAR_SIZE = 70;
+    const ITEM_SIZE = AVATAR_SIZE + SPACING * 3;
+
+    const BG_IMG = 'https://cdn.dribbble.com/users/3281732/screenshots/7003560/media/48d5ac3503d204751a2890ba82cc42ad.jpg?compress=1&resize=1200x1200';
+    const scrollY = React.useRef(new Animated.Value(0)).current;
+
     const [insertTodo, { loadingInsert, errorInsert }] = useMutation(INSERT_TODO);
     const [updateTodo, { loading: updating, error: updateError}] = useMutation(UPDATE_TODO);
     const [deleteTodo, {loading: deleting, error: deleteError}] = useMutation(REMOVE_TODO);
 
-    if(!data) return null;
+    
+
+    
 
     return (
         <View style={styles.container}>
-            <View style={{...styles.bodyContainer,width:width,height:height*0.9}}>
-                <FlatList
+            <StatusBar hidden/>
+            <Image
+                source = {{ uri: BG_IMG }}
+                style = {StyleSheet.absoluteFillObject}
+                blurRadius = {20}
+            />
+            {(!data) && (
+                <View style={{...styles.bodyContainer,width:width,height:height*0.95}}>
+                    <LoadingIndicator
+                        width = {width}
+                        height = {25}
+                        size = {250}
+                        color = 'rgb(204,0,204)'
+                    />
+                </View>
+                
+            )}
+            {(data) &&( 
+            <View style={{...styles.bodyContainer,width:width,height:height*0.95}}>
+                <Animated.FlatList
                     data = {data.todos}
-                    keyExtractor={(item) => item.id.toString()}
                     showsVerticalScrollIndicator = {false}
-                    pagingEnabled
-                    renderItem={({item}) => {
-                        return (
-                            <TouchableOpacity style={{...styles.item, backgroundColor: item.is_public?'green':'red'}}>
-                                <View style={styles.itemTitleContainer}>
-                                    <Text style={{...styles.itemTitle, fontSize:20}}>
-                                    {item.title.toString()}
+                    keyExtractor = {(item) => item.id.toString()}
+                    onScroll = {Animated.event(
+                        [{ nativeEvent : {contentOffset: {y:scrollY}}}],
+                        { useNativeDriver: true }
+                    )}
+                    contentContainerStyle = {{
+                        padding: SPACING,
+                        paddingTop: StatusBar.currentHeight || 42
+                    }}
+                    renderItem = {({item,index}) => {
+                        const inputRange = [
+                            -1,
+                            0,
+                            ITEM_SIZE * index,
+                            ITEM_SIZE * (index + 2)
+                        ]
+                        const opacityInputRange = [
+                            -1,
+                            0,
+                            ITEM_SIZE * index,
+                            ITEM_SIZE * (index + 0.5)
+                        ]
+                        const scale = scrollY.interpolate({
+                            inputRange,
+                            outputRange:[1,1,1,0]
+                        })
+                        const opacity = scrollY.interpolate({
+                            inputRange: opacityInputRange,
+                            outputRange:[1,1,1,0]
+                        })
+                        return <TouchableOpacity>
+                            <Animated.View style={{flexDirection: 'row', padding: SPACING, marginBottom: SPACING, backgroundColor:item.is_completed?"green":"red", borderRadius:12,
+                                    shadowColor: '#000',
+                                    shadowOffset: {
+                                        width: 0,
+                                        height: 5
+                                    },
+                                    shadowOpacity: 0.3,
+                                    shadowRadius: 10,
+                                    opacity,
+                                    transform: [{scale}]
+                                }}>
+                                <View>
+                                    <Text style = {{fontSize: 22, fontWeight: '700'}}>
+                                        {item.title}
+                                    </Text>
+                                    <Text style = {{fontSize: 18, opacity: .7}}>
+                                        {item.created_at.substring(0,19).replace("T"," ")}
+                                    </Text>
+                                    <Text style = {{fontSize: 14, opacity: .8, color: '#0099cc'}}>
+                                        {item.user.name}
                                     </Text>
                                 </View>
-                                <View style={styles.itemTitleContainer}>
-                                    <Text style={{...styles.itemTitle, fontSize:15}}>
-                                    {item.created_at.substring(0,19).replace("T"," ")}
-                                    </Text>
-                                </View>
-                                <View style={styles.itemTitleContainer}>
-                                    <Text style={{...styles.itemTitle, fontSize:15}}>
-                                    {item.user.name.toString()}
-                                    </Text>
-                                </View>
-                            </TouchableOpacity>
-                        );
+                            </Animated.View>
+                        </TouchableOpacity>
                     }}
                 />
+                 
                 <TouchableOpacity style={styles.sendButton} onPress={() => Actions.gqladd()}>
-                    <Text>
+                    <Text style = {{fontSize:18, fontWeight:'500', color:'white'}}>
                         Add New TODO
                     </Text>
                 </TouchableOpacity>
             </View>
+            )}       
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  sendButton: {
-    backgroundColor: 'blue',
-    width: '45%',
-    height: '6%',
-    textAlign: 'center',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderRadius: 15,
-    borderBottomRightRadius: 30,
-    marginTop:20,
-    //marginBottom: 60,
-  },
-  item: {
-    height:120,
-    width:250,
-    backgroundColor: 'red',
-    justifyContent:'center',
-    alignItems:'center',
-    flex:1,
-    marginVertical: 8,
-    borderRadius:20,
-    padding:10,
-  },
-  itemTitleContainer: {
-    backgroundColor: 'transparent',
-    justifyContent:'center',
-		alignItems:'center',
-    flex:1,
-  },
-  itemTitle: {
-    fontSize: 10,
-		color:'white',
-  },
+    container: {
+        flex: 1,
+        backgroundColor: '#fff',
+    },
+    sendButton: {
+        backgroundColor: 'blue',
+        width: '45%',
+        height: '6%',
+        textAlign: 'center',
+        justifyContent: 'center',
+        alignItems: 'center',
+        borderRadius: 15,
+        borderBottomRightRadius: 30,
+        //marginTop:20,
+        //marginBottom: 60,
+    },
+    item: {
+        height:120,
+        width:250,
+        backgroundColor: 'red',
+        justifyContent:'center',
+        alignItems:'center',
+        flex:1,
+        marginVertical: 8,
+        borderRadius:20,
+        padding:10,
+    },
+    itemTitleContainer: {
+        backgroundColor: 'transparent',
+        justifyContent:'center',
+            alignItems:'center',
+        flex:1,
+    },
+    itemTitle: {
+        fontSize: 10,
+        color:'white',
+    },
     bodyContainer: {
         backgroundColor: "transparent",
-        padding:8,
+        //padding:8,
         justifyContent:"center",
         alignItems:"center",
     },

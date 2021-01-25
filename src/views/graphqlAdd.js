@@ -13,8 +13,13 @@ import {
   FlatList,
   Image,
   Animated,
+  TextInput,
+  ActivityIndicator,
 } from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
+import FormInput from '../components/FormInput';
+import FormPicker from '../components/FormPicker';
+import ButtonCustom from '../components/ButtonCustom';
 
 import { HttpLink } from 'apollo-link-http';
 import { ApolloClient } from 'apollo-client';
@@ -23,6 +28,7 @@ import { NetworkStatus } from '@apollo/client';
 //import gql from 'graphql-tag';
 import { gql, useQuery } from '@apollo/client';
 import { useMutation } from '@apollo/react-hooks';
+import {Picker} from '@react-native-picker/picker';
 
 const FETCH_TODOS = gql`
     query ($isPublic: Boolean) {
@@ -45,11 +51,11 @@ const FETCH_TODOS = gql`
     }
 `;
 const INSERT_TODO = gql`
-    mutation ($text: String!, $isPublic: Boolean){
+    mutation ($text: String!, $booleanPublic: Boolean){
         insert_todos (
             objects: [{
                 title: $text,
-                is_public: $isPublic
+                is_public: $booleanPublic
             }]
         ){
             returning {
@@ -69,21 +75,22 @@ const INSERT_TODO = gql`
 
 
 const graphqlAdd = () => {
-    const [insertTodo, { loadingInsert, errorInsert }] = useMutation(INSERT_TODO);
+    const [insertTodo, { data ,loading, errorInsert }] = useMutation(INSERT_TODO);
     const {width, height} = Dimensions.get('screen');
     const [isPublic, setIsPublic] = React.useState(true);
-    const [text, setText] = React.useState('AAA');
-    //const [insertTodo, { loadingInsert, errorInsert }] = useMutation(INSERT_TODO);
+    const [text, setText] = React.useState('');
+    const [isPublicForm, setIsPublicForm] = React.useState("");
     //const [updateTodo, { loading: updating, error: updateError}] = useMutation(UPDATE_TODO);
-    
-    
-
     const submit = () => {
+        var booleanPublic = isPublicForm == "t"?true:false;
+        //const booleanPublic = true;
         insertTodo({
-            variables: { text, isPublic },
-            update: updateCache
+            variables: { text, booleanPublic },
+            //update: updateCache
         });
     }; 
+
+    //data?Actions.home():setCounter(1);
 
     const updateCache = (client, {data:{insert_todos}}) => {
         const data = client.readQuery({
@@ -105,17 +112,44 @@ const graphqlAdd = () => {
         });
     }
 
-
-    
-    
-
-
     return (
         <View style={styles.container}>
-            <View style={{...styles.bodyContainer,width:width,height:height*0.9}}>
-                <Text>
-                    AAA
-                </Text>
+            <View style={{flex:2, backgroundColor:'transparent', width, justifyContent:'center',alignItems:'center'}}>
+                <Text style={{fontSize:25, fontWeight:'500'}}>Add new TODO</Text>
+            </View>
+            <View style={{flex:2, backgroundColor:'transparent',width}}>
+                <FormInput 
+                    formWidth={width} 
+                    flexValueTitle={1} 
+                    flexValueInput={3} 
+                    titleValue={"TODO Title"} 
+                    placeholderValue={"Enter title for TODO"}
+                    onChangeText={(e)=>setText(e)}
+                    inputBorderColor={text==""?'purple':'green'}
+                    sensitiveContent={false}
+                    textInputValue={text}
+                />
+            </View>
+            <View style={{flex:2, backgroundColor:'transparent',width}}>
+                <FormPicker
+                    width = {width}
+                    flexValueTitle={1} 
+                    flexValueInput={5} 
+                    pickerOptions = {["Private|f","Public|t"]}
+                    titleValue={"TODO Visibility"} 
+                    onChangePick={(itemValue, itemIndex) => setIsPublicForm(itemValue)}
+                    selectedPick = {isPublicForm}
+                />
+            </View>
+            <View style={{flex:2, backgroundColor:'transparent',width, justifyContent:'center',alignItems:'center'}}>
+                <ButtonCustom
+                    width = {width/2}
+                    height = {80}
+                    onPress = {() => submit()}
+                    buttonText = {"Add"}
+                    bgColor = {text==""?'purple':'green'}
+                    isDisabled = {text==""?true:false}
+                />
             </View>
         </View>
     );
@@ -140,17 +174,6 @@ const styles = StyleSheet.create({
     marginTop:20,
     //marginBottom: 60,
   },
-  item: {
-    height:120,
-    width:250,
-    backgroundColor: 'red',
-    justifyContent:'center',
-    alignItems:'center',
-    flex:1,
-    marginVertical: 8,
-    borderRadius:20,
-    padding:10,
-  },
   itemTitleContainer: {
     backgroundColor: 'transparent',
     justifyContent:'center',
@@ -170,3 +193,4 @@ const styles = StyleSheet.create({
 });
 
 export default graphqlAdd;
+

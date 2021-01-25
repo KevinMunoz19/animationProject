@@ -18,6 +18,7 @@ import Animation2 from './src/views/Animation2';
 import Animation3 from './src/views/Animation3';
 import Animation4 from './src/views/Animation4';
 import Animation5 from './src/views/Animation5';
+import AnimatedHome from './src/views/AnimatedHome';
 import gqlEx from './src/views/graphqlEx';
 import gqlAdd from './src/views/graphqlAdd';
 import jwtDecoder from 'jwt-decode';
@@ -56,25 +57,14 @@ const login = (email, password, token) => {
     console.log(err);
   })
 };
-//const client = new ApolloClient(makeApolloClient('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJrZXZpbmVtdW5vejk3QGdtYWlsLmNvbSIsIm5hbWUiOiJrZXZpbmVtdW5vejk3IiwiaWF0IjoxNjEwOTg3NDYwLjEwNCwiaXNzIjoiaHR0cHM6Ly9oYXN1cmEuaW8vbGVhcm4vIiwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtdXNlci1pZCI6ImtldmluZW11bm96OTdAZ21haWwuY29tIiwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIn0sImV4cCI6MTYxMTA3Mzg2MH0.5zyGzechF5PpVq_JkNKdBIcvAlti6a3ilOdeetHRRbM'));
 
 const link = ApolloLink.from([createHttpLink({uri:'https://hasura.io/learn/graphql', headers:{
   'Content-Type': 'application/json',
-  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJrZXZpbmVtdW5vejk3QGdtYWlsLmNvbSIsIm5hbWUiOiJrZXZpbmVtdW5vejk3IiwiaWF0IjoxNjEwOTg3NDYwLjEwNCwiaXNzIjoiaHR0cHM6Ly9oYXN1cmEuaW8vbGVhcm4vIiwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtdXNlci1pZCI6ImtldmluZW11bm96OTdAZ21haWwuY29tIiwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIn0sImV4cCI6MTYxMTA3Mzg2MH0.5zyGzechF5PpVq_JkNKdBIcvAlti6a3ilOdeetHRRbM',
+  'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJrZXZpbmVtdW5vejk3QGdtYWlsLmNvbSIsIm5hbWUiOiJrZXZpbmVtdW5vejk3IiwiaWF0IjoxNjExNTg1MDAyLjM3NSwiaXNzIjoiaHR0cHM6Ly9oYXN1cmEuaW8vbGVhcm4vIiwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtdXNlci1pZCI6ImtldmluZW11bm96OTdAZ21haWwuY29tIiwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIn0sImV4cCI6MTYxMTY3MTQwMn0.mw72c55PvVWJu6zkuhUCbFZHQU2Y8Z9oPBGuV5mXSrI',
 }})]);
-//setClient(client);
+
 const cache = new InMemoryCache();
-/* const authLink = setContext((_, { headers }) => {
-  // get the authentication token from local storage if it exists
-  const token = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJrZXZpbmVtdW5vejk3QGdtYWlsLmNvbSIsIm5hbWUiOiJrZXZpbmVtdW5vejk3IiwiaWF0IjoxNjEwOTg3NDYwLjEwNCwiaXNzIjoiaHR0cHM6Ly9oYXN1cmEuaW8vbGVhcm4vIiwiaHR0cHM6Ly9oYXN1cmEuaW8vand0L2NsYWltcyI6eyJ4LWhhc3VyYS1hbGxvd2VkLXJvbGVzIjpbInVzZXIiXSwieC1oYXN1cmEtdXNlci1pZCI6ImtldmluZW11bm96OTdAZ21haWwuY29tIiwieC1oYXN1cmEtZGVmYXVsdC1yb2xlIjoidXNlciIsIngtaGFzdXJhLXJvbGUiOiJ1c2VyIn0sImV4cCI6MTYxMTA3Mzg2MH0.5zyGzechF5PpVq_JkNKdBIcvAlti6a3ilOdeetHRRbM';
-  // return the headers to the context so httpLink can read them
-  return {
-    headers: {
-      ...headers,
-      authorization: token ? `Bearer ${token}` : "",
-    }
-  }
-}); */
+
 
 const client = new ApolloClient({
   link,
@@ -117,6 +107,7 @@ const App = () => {
           <Scene key="a5" component={Animation5} hideNavBar={true} title="A5" initial={false}/>
           <Scene key="gqlex" component={gqlEx} hideNavBar={true} title="Gqlex" initial={false}/>
           <Scene key="gqladd" component={gqlAdd} hideNavBar={true} title="Gqladd" initial={false}/>
+          <Scene key="ahome" component={AnimatedHome} hideNavBar={true} title="Ahome" initial={false}/>
 
         </Stack>
       </Router>

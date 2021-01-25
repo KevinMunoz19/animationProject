@@ -9,40 +9,83 @@ import {
 	ImageBackground,
 	ActivityIndicator,
 	NativeModules,
-	NativeEventEmitter,
+  NativeEventEmitter,
+  StatusBar,
+  Animated,
+  Dimensions,
 }	from 'react-native';
 
 import GlobalColors from '../utils/GlobalColors';
+import LoadingIndicator from '../components/LoadingIndicator';
 
 const Init = () => {
-	const [loading,setLoading] = useState(false);
+  const [loading,setLoading] = useState(false);
+  const BG_IMG = 'https://cdn.dribbble.com/users/3281732/screenshots/10439348/media/b0ca2c70dd9890d1cff6ce721981f495.jpg?compress=1&resize=1200x1200';
+  const [duration, setDuration] =React.useState(5);
+  const viewAnimation = React.useRef(new Animated.Value(0)).current;
+  const {width, height} = Dimensions.get('screen');
+
+  const animation = React.useCallback(() => {
+    Animated.sequence([
+      Animated.timing(viewAnimation,{
+          toValue:1,
+          duration: 300,
+          useNativeDriver:true
+      }),
+    ]).start(() => {
+      Actions.ahome();
+      Animated.timing(viewAnimation, {
+        toValue:0,
+        duration: 1000,
+        useNativeDriver:true
+      }).start()
+    })
+},[duration]);
+
+const translateY = viewAnimation.interpolate({
+  inputRange: [0, 1],
+  outputRange: [0, 600]
+});
+
+  
+  React.useEffect(() => {
+    //Actions.ahome()
+    //Actions.gqladd()
+    //Actions.ahome()
+  })
 
   return (
+    
     <View style={styles.container}>
-			{loading && (
-				<View style={styles.loaderContainer}>
-					<ActivityIndicator visible={false} size='large' />
-					<Text allowFontScaling={false}>Cargando...</Text>
-				</View>
-			)}
-			{!loading && (
-        <View style={styles.textHeaderContainer}>
-          <Text style={{ ...styles.textHeader, fontSize:30}} allowFontScaling={false}>Animation API Showcase</Text>
-        </View>
-			)}
-      <React.Fragment>
-					<TouchableOpacity style={styles.sendButton} onPress={() => Actions.home()}>
-            <Text style={{textAlign:'center', fontSize:25}} allowFontScaling={false}>Go</Text>
-          </TouchableOpacity>
-      </React.Fragment>
+      <StatusBar hidden/>
+      <Image
+          source = {{ uri: BG_IMG }}
+          style = {StyleSheet.absoluteFillObject}
+          blurRadius = {4}
+      />
+      <Animated.View style={styles.textHeaderContainer,{transform: [{
+              translateY,
+            }]}}>
+        <Text style={{
+           ...styles.textHeader, 
+           fontSize:50, 
+           fontWeight:'600'
+           
+           }} allowFontScaling={false}>React Native Showcase</Text>
+      </Animated.View>
+      <TouchableOpacity style={styles.sendButton} onPress={animation}>
+        <Text style={{textAlign:'center', fontSize:25}} allowFontScaling={false}>Go</Text>
+      </TouchableOpacity>
+      
     </View>
   );
 };
 
+
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-		flexDirection: 'column',
     justifyContent: 'center',
     alignItems: 'center',
 		backgroundColor: GlobalColors.PrimaryColor,
@@ -69,7 +112,7 @@ const styles = StyleSheet.create({
 		marginBottom:60,
 	},
 	textHeader:{
-    color:'white',
+    color:'orange',
     fontSize:25,
   },
   textHeaderContainer:{
